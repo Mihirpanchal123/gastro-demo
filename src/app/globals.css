@@ -1,26 +1,170 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
+/* ---------- Design tokens ---------- */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-serif: var(--font-serif-display);
+
+  --color-ink: #0a1d1c;
+  --color-ink-2: #12302e;
+  --color-paper: #f6f7f3;
+  --color-mist: #e9eee8;
+  --color-teal: #0e7c6b;
+  --color-teal-deep: #075548;
+  --color-mint: #9fe7d2;
+  --color-coral: #ff7a59;
+  --color-sand: #f1e9dc;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  scroll-behavior: smooth;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-paper);
+  color: var(--color-ink);
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+::selection {
+  background: var(--color-mint);
+  color: var(--color-ink);
+}
+
+/* Component classes live in a layer so Tailwind utilities (e.g. bg-ink/70) can override them */
+@layer components {
+/* ---------- Aurora background ---------- */
+.aurora {
+  position: absolute;
+  inset: -20%;
+  filter: blur(80px);
+  opacity: 0.7;
+  pointer-events: none;
+}
+.aurora span {
+  position: absolute;
+  border-radius: 9999px;
+  mix-blend-mode: screen;
+  animation: drift 18s ease-in-out infinite alternate;
+}
+.aurora span:nth-child(1) {
+  width: 46vw; height: 46vw; left: 50%; top: 5%;
+  background: radial-gradient(circle, #0e7c6b 0%, transparent 70%);
+}
+.aurora span:nth-child(2) {
+  width: 38vw; height: 38vw; left: 65%; top: 35%;
+  background: radial-gradient(circle, #9fe7d2 0%, transparent 70%);
+  opacity: 0.45;
+  animation-duration: 22s;
+}
+.aurora span:nth-child(3) {
+  width: 30vw; height: 30vw; left: 20%; top: 55%;
+  background: radial-gradient(circle, #ff7a59 0%, transparent 70%);
+  opacity: 0.25;
+  animation-duration: 26s;
+}
+@keyframes drift {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-6%, 4%) scale(1.08); }
+  100% { transform: translate(4%, -5%) scale(0.95); }
+}
+
+/* Subtle grid texture */
+.grid-lines {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px);
+  background-size: 64px 64px;
+  mask-image: radial-gradient(ellipse at 60% 40%, black 30%, transparent 75%);
+}
+
+/* ---------- Glass ---------- */
+.glass {
+  background: rgb(255 255 255 / 0.07);
+  border: 1px solid rgb(255 255 255 / 0.12);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+}
+.glass-light {
+  background: rgb(255 255 255 / 0.72);
+  border: 1px solid rgb(10 29 28 / 0.08);
+  backdrop-filter: blur(18px) saturate(160%);
+  -webkit-backdrop-filter: blur(18px) saturate(160%);
+}
+
+}
+
+/* ---------- Motion ---------- */
+/* Hidden until RevealObserver animates it in (see components/RevealObserver.tsx) */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+}
+
+.float-slow { animation: float 7s ease-in-out infinite; }
+.float-slower { animation: float 9s ease-in-out infinite; animation-delay: -3s; }
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-14px); }
+}
+
+.marquee {
+  animation: marquee 40s linear infinite;
+}
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.pulse-dot::after {
+  content: "";
+  position: absolute;
+  inset: -4px;
+  border-radius: 9999px;
+  border: 2px solid currentColor;
+  animation: ping 1.8s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+@keyframes ping {
+  75%, 100% { transform: scale(2); opacity: 0; }
+}
+
+.spin-slow { animation: spin 30s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Gradient text */
+.text-gradient {
+  background: linear-gradient(100deg, #9fe7d2 0%, #ffffff 45%, #ffb59f 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Spotlight card hover */
+.spotlight {
+  position: relative;
+  overflow: hidden;
+}
+.spotlight::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(400px circle at var(--mx, 50%) var(--my, 50%), rgb(159 231 210 / 0.35), transparent 40%);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.spotlight:hover::before { opacity: 1; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+  .reveal { opacity: 1; transform: none; }
+  html { scroll-behavior: auto; }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: none; }
 }
